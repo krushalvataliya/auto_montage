@@ -8,6 +8,7 @@ output/
 temp/
 logs/
 *.log
+root_script/
 
 # Environments
 .env
