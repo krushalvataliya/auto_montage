@@ -1,0 +1,116 @@
+# ==============================================================================
+# Automated Video Generator Configuration File
+# ==============================================================================
+
+# Directories
+paths:
+  # Path to the directory containing input videos, background music, and logo
+  # Can be relative or absolute path.
+  input_dir: "c:/Users/Krushal Vataliya/Downloads/yt retune/Girnaar Farte Lili Parikramaa"
+  
+  # Directory where the final rendered video will be exported
+  output_dir: "./output"
+  
+  # Temporary folder for intermediate clips and concat playlists
+  temp_dir: "./temp"
+  
+  # Directory for logging output
+  log_dir: "./logs"
+  
+  # Name of the exported output video file
+  output_filename: "final_video.mp4"
+
+  # Optional explicit paths to ffmpeg/ffprobe executables (leave empty for auto-detection)
+  ffmpeg_path: ""
+  ffprobe_path: ""
+
+# Video Processing & Normalization
+video:
+  # Playback speed factor (e.g., 0.66 for 66% speed slow motion; 1.0 for normal speed)
+  slow_motion_speed: 0.66
+  
+  # Output canvas dimensions (width x height)
+  target_width: 1920
+  target_height: 1080
+  
+  # Output frame rate in FPS
+  target_fps: 30
+  
+  # Aspect ratio handling when input video does not match target aspect ratio:
+  #  - "pad": Scale to fit inside canvas and pad with black borders (letterbox/pillarbox).
+  #  - "crop": Scale to fill entire canvas and crop excess edges from center.
+  scaling_mode: "pad"
+  
+  # Video codec for re-encoding ("libx264" recommended for universal compatibility)
+  video_codec: "libx264"
+  
+  # Constant Rate Factor (CRF): 17-23 is visually lossless. Lower = higher quality/larger size.
+  crf: 18
+  
+  # Encoding preset: "ultrafast", "superfast", "veryfast", "faster", "fast", "medium", "slow"
+  preset: "fast"
+
+# Audio Settings
+audio:
+  # Optional explicit music filename inside input_dir (leave empty to auto-detect single audio file)
+  music_filename: ""
+  
+  # Audio fade-in duration in seconds
+  fade_in_duration: 1.0
+  
+  # Audio fade-out duration in seconds
+  fade_out_duration: 2.0
+  
+  # Audio codec ("aac" recommended)
+  audio_codec: "aac"
+  
+  # Audio bitrate (e.g., "192k", "256k", "320k")
+  audio_bitrate: "192k"
+
+# PNG Logo Overlay Settings
+logo:
+  # Enable or disable logo overlay on the final video
+  enabled: true
+  
+  # Optional explicit logo filename inside input_dir (leave empty to auto-detect single PNG)
+  filename: ""
+  
+  # Logo position: "top-left", "top-right", "bottom-left", "bottom-right", "center"
+  position: "bottom-right"
+  
+  # Size of logo as a percentage of the video width (e.g., 12 for 12% of 1920 = 230px)
+  width_percent: 12.0
+  
+  # Maximum width in pixels (acts as an upper limit cap)
+  max_width_px: 250
+  
+  # Optional maximum height in pixels (null or empty to preserve natural aspect ratio)
+  max_height_px: null
+  
+  # Horizontal margin from the edge in pixels
+  margin_x: 30
+  
+  # Vertical margin from the edge in pixels
+  margin_y: 30
+  
+  # Opacity of logo (1.0 = fully opaque, 0.5 = 50% transparent)
+  opacity: 1.0
+
+# Assembly & Sequence Settings
+sequence:
+  # Optional random seed for reproducible random selection during Stage 2 reuse (e.g. 42).
+  # Leave null/empty for true random editing every run.
+  random_seed: null
+
+# General & Error Handling Options
+execution:
+  # Log level: "DEBUG", "INFO", "WARNING", "ERROR"
+  log_level: "INFO"
+  
+  # Behavior when a corrupted or unreadable video file is encountered:
+  #  - "abort": Stop execution immediately and raise error.
+  #  - "skip": Log a warning, exclude the corrupted file, and continue with remaining videos.
+  on_corrupt_file: "abort"
+  
+  # Keep temporary files after export (true to keep for inspection/caching, false to clean up)
+  keep_temp: true
