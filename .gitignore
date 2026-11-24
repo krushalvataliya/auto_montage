@@ -10,6 +10,9 @@ logs/
 *.log
 root_script/
 
+# Local configuration
+config.json
+
 # Environments
 .env
 .venv
