@@ -37,6 +37,10 @@ A modular, production-ready Python application that automatically generates an e
   - Configurable sizing via percentage of video width, max width in pixels, and optional max height.
   - Strict aspect ratio preservation (never stretched or distorted).
   - Preserves alpha transparency and respects margin boundaries.
+- **AI Video Prompt & YouTube Metadata Generator (Gemini):**
+  - Reads `lyrics.txt` and automatically generates 8 cinematic, candid, 10–12s photorealistic 4K prompts.
+  - Automatically writes `video prompt.txt` with essential negative/restraining conditions and repeat order.
+  - Automatically writes `title desc tags.txt` with searchable title, engaging Gujarati description, and verified 500-char tags.
 - **Background Music Handling:**
   - Single audio track sourced from background music file.
   - Configurable audio fade-in and fade-out durations.
@@ -49,11 +53,15 @@ A modular, production-ready Python application that automatically generates an e
 ```text
 video generator/
 ├── main.py                     # Main CLI entry point
-├── config.yaml                 # Central configuration file
+├── generate_prompts.py         # AI Prompt & YouTube Metadata Generator (Gemini)
+├── config.json                 # User-friendly configuration file (JSON)
+├── config.json.example         # Example configuration template
+├── config.yaml                 # Configuration file (YAML alternative)
 ├── requirements.txt            # Python dependencies
 ├── README.md                   # Full documentation & guide
 ├── src/
 │   ├── __init__.py
+│   ├── prompt_generator.py     # Gemini prompt & metadata creation engine
 │   ├── file_discovery.py       # Scans input folder and validates media files
 │   ├── video_sorting.py        # Natural numerical sorting and gap detection
 │   ├── video_processing.py     # Slow-motion, audio removal, format normalization
@@ -203,6 +211,16 @@ python main.py
 ```bash
 python main.py --input "path/to/my_folder" --output "path/to/my_output" --speed 0.5 --seed 42
 ```
+
+### Generate AI Video Prompts & YouTube Metadata (Gemini):
+```bash
+# Generate for a specific song folder:
+python generate_prompts.py --folder "path/to/song_folder"
+
+# Or generate for all folders containing lyrics.txt:
+python generate_prompts.py --all
+```
+*(You can also ask directly in the chat to generate prompts and metadata for any song folder!)*
 
 ---
 

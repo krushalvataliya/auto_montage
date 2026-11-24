@@ -3,6 +3,7 @@
   "output": "",
   "speed": 0.66,
   "seed": 42,
+  "gemini_api_key": "",
   "logo_path": "",
   "logo": {
     "enabled": true,
