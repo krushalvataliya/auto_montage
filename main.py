@@ -5,6 +5,7 @@ Main CLI entry point orchestrating discovery, sorting, processing, sequencing, a
 """
 
 import argparse
+import json
 import logging
 import sys
 import time
@@ -27,15 +28,20 @@ logger = logging.getLogger("video_editor")
 
 
 def load_config(config_path: Path) -> Dict[str, Any]:
-    """Loads and validates YAML configuration file."""
+    """Loads and validates JSON or YAML configuration file."""
     if not config_path.is_file():
         raise FileNotFoundError(f"Configuration file not found: {config_path}")
 
     with open(config_path, "r", encoding="utf-8") as f:
+        if config_path.suffix.lower() == ".json":
+            try:
+                return json.load(f) or {}
+            except json.JSONDecodeError as e:
+                raise ValueError(f"Failed to parse JSON config file '{config_path}': {e}") from e
         try:
-            config = yaml.safe_load(f) or {}
+            return yaml.safe_load(f) or {}
         except yaml.YAMLError as e:
-            raise ValueError(f"Failed to parse config file '{config_path}': {e}") from e
+            raise ValueError(f"Failed to parse YAML config file '{config_path}': {e}") from e
 
     return config
 
@@ -46,8 +52,8 @@ def main() -> int:
     )
     parser.add_argument(
         "-c", "--config",
-        default="config.yaml",
-        help="Path to YAML configuration file (default: config.yaml)"
+        default=None,
+        help="Path to configuration file (.json or .yaml) (default: auto-detects config.json then config.yaml)"
     )
     parser.add_argument(
         "-i", "--input",
@@ -82,12 +88,19 @@ def main() -> int:
 
     args = parser.parse_args()
 
-    # 1. Load Configuration
-    config_file = Path(args.config)
-    if not config_file.is_file():
-        # Fallback to script directory config.yaml
+    # 1. Load Configuration (auto-detects config.json first, then config.yaml)
+    if args.config:
+        config_file = Path(args.config)
+    else:
         script_dir = Path(__file__).resolve().parent
-        config_file = script_dir / "config.yaml"
+        if (script_dir / "config.json").is_file():
+            config_file = script_dir / "config.json"
+        elif Path("config.json").is_file():
+            config_file = Path("config.json")
+        elif (script_dir / "config.yaml").is_file():
+            config_file = script_dir / "config.yaml"
+        else:
+            config_file = Path("config.yaml")
 
     try:
         config = load_config(config_file)
@@ -102,6 +115,35 @@ def main() -> int:
     logo_cfg = config.get("logo", {})
     seq_cfg = config.get("sequence", {})
     exec_cfg = config.get("execution", {})
+
+    # Top-level direct shortcuts (from config.json)
+    if "input" in config and config["input"]:
+        paths_cfg["input_dir"] = config["input"]
+    elif "input_dir" in config and config["input_dir"]:
+        paths_cfg["input_dir"] = config["input_dir"]
+
+    if "output" in config and config["output"] is not None:
+        paths_cfg["output_dir"] = config["output"]
+    elif "output_dir" in config and config["output_dir"] is not None:
+        paths_cfg["output_dir"] = config["output_dir"]
+
+    if "output_filename" in config and config["output_filename"]:
+        paths_cfg["output_filename"] = config["output_filename"]
+
+    if "speed" in config and config["speed"] is not None:
+        video_cfg["slow_motion_speed"] = config["speed"]
+    elif "slow_motion_speed" in config and config["slow_motion_speed"] is not None:
+        video_cfg["slow_motion_speed"] = config["slow_motion_speed"]
+
+    if "seed" in config and config["seed"] is not None:
+        seq_cfg["random_seed"] = config["seed"]
+    elif "random_seed" in config and config["random_seed"] is not None:
+        seq_cfg["random_seed"] = config["random_seed"]
+
+    if "logo_path" in config and config["logo_path"]:
+        logo_cfg["path"] = config["logo_path"]
+    elif "logo path" in config and config["logo path"]:
+        logo_cfg["path"] = config["logo path"]
 
     # CLI Overrides
     if args.input_dir:
@@ -171,7 +213,7 @@ def main() -> int:
             input_dir=input_dir,
             logo_enabled=logo_cfg.get("enabled", True),
             custom_music_path=audio_cfg.get("music_filename") or None,
-            custom_logo_path=logo_cfg.get("filename") or None,
+            custom_logo_path=logo_cfg.get("path") or logo_cfg.get("filename") or None,
             ignore_filenames={output_filename, f"{input_dir.name} - final video.mp4"}
         )
     except FileDiscoveryError as e:
@@ -244,7 +286,7 @@ def main() -> int:
     if logo_cfg.get("enabled", True) and discovered.logo_file:
         logo_obj = LogoConfig(
             enabled=True,
-            filename=logo_cfg.get("filename"),
+            filename=logo_cfg.get("path") or logo_cfg.get("filename"),
             position=logo_cfg.get("position", "bottom-right"),
             width_percent=float(logo_cfg.get("width_percent", 12.0)),
             max_width_px=logo_cfg.get("max_width_px", 250),

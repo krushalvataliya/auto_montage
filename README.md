@@ -108,55 +108,60 @@ pip install static-ffmpeg
 
 ---
 
-## Configuration (`config.yaml`)
+## Configuration (`config.json` & `config.yaml`)
 
-All parameters are configurable without altering code:
+You can run the application with **zero command-line arguments**:
+```bash
+python main.py
+```
+It automatically loads [`config.json`](file:///c:/Users/Krushal%20Vataliya/Downloads/yt%20retune/video%20generator/config.json) (or falls back to `config.yaml`).
 
-```yaml
-paths:
-  input_dir: "c:/Users/Krushal Vataliya/Downloads/yt retune/Girnaar Farte Lili Parikramaa"
-  output_dir: ""                 # Empty ("") saves directly inside input_dir
-  temp_dir: "./temp"
-  log_dir: "./logs"
-  output_filename: ""            # Empty ("") defaults to "<folder_name> - final video.mp4"
-  ffmpeg_path: ""
-  ffprobe_path: ""
-
-video:
-  slow_motion_speed: 0.66        # 0.66x playback speed
-  target_width: 1920             # Output resolution width
-  target_height: 1080            # Output resolution height
-  target_fps: 30                 # 30 frames per second
-  scaling_mode: "pad"            # "pad" (letterbox/pillarbox) or "crop" (fill canvas)
-  video_codec: "libx264"
-  crf: 18                        # 18 = visually lossless
-  preset: "fast"
-
-audio:
-  music_filename: ""             # Empty to auto-detect single audio file
-  fade_in_duration: 1.0          # 1 second fade-in
-  fade_out_duration: 2.0         # 2 second fade-out
-  audio_codec: "aac"
-  audio_bitrate: "192k"
-
-logo:
-  enabled: true
-  filename: ""                   # Empty to auto-detect single PNG
-  position: "bottom-right"       # top-left, top-right, bottom-left, bottom-right, center
-  width_percent: 12.0            # 12% of video width
-  max_width_px: 250              # Max pixel width
-  max_height_px: null
-  margin_x: 30                   # Margin in pixels
-  margin_y: 30
-  opacity: 1.0
-
-sequence:
-  random_seed: null              # Set integer (e.g. 42) for reproducible edits
-
-execution:
-  log_level: "INFO"
-  on_corrupt_file: "abort"       # "abort" or "skip"
-  keep_temp: true                # Keep cached normalized clips
+### Example `config.json`:
+```json
+{
+  "input": "c:/Users/Krushal Vataliya/Downloads/yt retune/Girnaar Farte Lili Parikramaa",
+  "output": "",
+  "speed": 0.66,
+  "seed": 42,
+  "logo_path": "",
+  "logo": {
+    "enabled": true,
+    "position": "bottom-right",
+    "width_percent": 12.0,
+    "max_width_px": 250,
+    "max_height_px": null,
+    "margin_x": 30,
+    "margin_y": 30,
+    "opacity": 1.0
+  },
+  "video": {
+    "target_width": 1920,
+    "target_height": 1080,
+    "target_fps": 30,
+    "scaling_mode": "pad",
+    "video_codec": "libx264",
+    "crf": 18,
+    "preset": "fast"
+  },
+  "audio": {
+    "music_filename": "",
+    "fade_in_duration": 1.0,
+    "fade_out_duration": 2.0,
+    "audio_codec": "aac",
+    "audio_bitrate": "192k"
+  },
+  "paths": {
+    "temp_dir": "./temp",
+    "log_dir": "./logs",
+    "ffmpeg_path": "",
+    "ffprobe_path": ""
+  },
+  "execution": {
+    "log_level": "INFO",
+    "on_corrupt_file": "abort",
+    "keep_temp": true
+  }
+}
 ```
 
 ---

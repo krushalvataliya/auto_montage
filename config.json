@@ -1,0 +1,44 @@
+{
+  "input": "c:/Users/Krushal Vataliya/Downloads/yt retune/Girnaar Farte Lili Parikramaa",
+  "output": "",
+  "speed": 0.66,
+  "seed": 42,
+  "logo_path": "",
+  "logo": {
+    "enabled": true,
+    "position": "bottom-right",
+    "width_percent": 12.0,
+    "max_width_px": 250,
+    "max_height_px": null,
+    "margin_x": 30,
+    "margin_y": 30,
+    "opacity": 1.0
+  },
+  "video": {
+    "target_width": 1920,
+    "target_height": 1080,
+    "target_fps": 30,
+    "scaling_mode": "pad",
+    "video_codec": "libx264",
+    "crf": 18,
+    "preset": "fast"
+  },
+  "audio": {
+    "music_filename": "",
+    "fade_in_duration": 1.0,
+    "fade_out_duration": 2.0,
+    "audio_codec": "aac",
+    "audio_bitrate": "192k"
+  },
+  "paths": {
+    "temp_dir": "./temp",
+    "log_dir": "./logs",
+    "ffmpeg_path": "",
+    "ffprobe_path": ""
+  },
+  "execution": {
+    "log_level": "INFO",
+    "on_corrupt_file": "abort",
+    "keep_temp": true
+  }
+}
