@@ -27,13 +27,13 @@ Controls slow motion, format normalization, and encoding quality.
 | Parameter | Type | Default | Description |
 |---|---|---|---|
 | `slow_motion_speed` | `float` | `0.66` | Playback speed factor. `0.66` = 66% speed (slow motion). `1.0` = normal speed. |
-| `target_width` | `int` | `1920` | Output video canvas width in pixels. |
-| `target_height` | `int` | `1080` | Output video canvas height in pixels. |
-| `target_fps` | `int` | `30` | Output frame rate in frames per second. |
+| `target_width` | `int/string` | `"auto"` | Output width. Set `"auto"` to preserve native source resolution without blurry upscaling. |
+| `target_height` | `int/string` | `"auto"` | Output height. Set `"auto"` to preserve native source resolution. |
+| `target_fps` | `int/string` | `"auto"` | Output frame rate. Set `"auto"` to match source FPS and avoid cadence judder. |
 | `scaling_mode` | `string` | `"pad"` | Aspect ratio strategy: `"pad"` (letterbox/pillarbox) or `"crop"` (fill canvas). |
 | `video_codec` | `string` | `"libx264"` | Video codec (H.264 standard for universal compatibility). |
-| `crf` | `int` | `18` | Constant Rate Factor (0-51). Lower = higher quality. 17-20 is visually lossless. |
-| `preset` | `string` | `"fast"` | x264 preset (`ultrafast`, `faster`, `fast`, `medium`, `slow`). |
+| `crf` | `int` | `15` | Constant Rate Factor (0-51). Lower = higher quality. 14-16 is pristine studio quality. |
+| `preset` | `string` | `"medium"` | x264 preset (`medium` enables subme 7 and trellis for maximum texture sharpness). |
 
 ---
 

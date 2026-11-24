@@ -18,7 +18,7 @@ from src.audio_processing import AudioConfig, AudioProcessor
 from src.duration_manager import DurationManager
 from src.file_discovery import FileDiscoveryError, discover_files
 from src.logo_overlay import LogoConfig, LogoOverlayManager
-from src.utils import FFmpegNotFoundError, MediaProcessingError, find_ffmpeg, setup_logger
+from src.utils import FFmpegNotFoundError, MediaProcessingError, find_ffmpeg, get_media_info, setup_logger
 from src.video_export import VideoExporter
 from src.video_processing import VideoProcessor
 from src.video_sequence import SequenceBuilder
@@ -226,19 +226,54 @@ def main() -> int:
         logger.error("No valid video files available for processing.")
         return 1
 
+    # 5.5 Auto-detect target resolution & FPS from source media if set to "auto"
+    raw_w = video_cfg.get("target_width")
+    raw_h = video_cfg.get("target_height")
+    raw_fps = video_cfg.get("target_fps")
+
+    auto_w = raw_w is None or str(raw_w).strip().lower() in ("", "auto", "0", "null", "none")
+    auto_h = raw_h is None or str(raw_h).strip().lower() in ("", "auto", "0", "null", "none")
+    auto_fps = raw_fps is None or str(raw_fps).strip().lower() in ("", "auto", "0", "null", "none")
+
+    source_w, source_h, source_fps = 1920, 1080, 30
+    if auto_w or auto_h or auto_fps:
+        try:
+            sample_info = get_media_info(sorted_video_paths[0], ffprobe_bin, ffmpeg_bin)
+            for st in sample_info.get("streams", []):
+                if st.get("codec_type") == "video":
+                    source_w = int(st.get("width", 1920))
+                    source_h = int(st.get("height", 1080))
+                    r_fps = st.get("r_frame_rate", "30/1")
+                    if "/" in r_fps:
+                        num, den = r_fps.split("/")
+                        source_fps = int(round(float(num) / float(den))) if float(den) > 0 else 30
+                    elif r_fps:
+                        source_fps = int(round(float(r_fps)))
+                    break
+        except Exception as e:
+            logger.warning("Could not auto-detect source video resolution/fps: %s", e)
+
+    target_width = source_w if auto_w else int(raw_w)
+    target_height = source_h if auto_h else int(raw_h)
+    target_fps = source_fps if auto_fps else int(raw_fps)
+
+    logger.info("Canvas format: %dx%d @ %d FPS (auto-detected: %s)",
+                target_width, target_height, target_fps,
+                f"w={'auto' if auto_w else 'fixed'}, h={'auto' if auto_h else 'fixed'}, fps={'auto' if auto_fps else 'fixed'}")
+
     # 6. Video Processing & Normalization
     video_proc = VideoProcessor(
         ffmpeg_bin=ffmpeg_bin,
         ffprobe_bin=ffprobe_bin,
         temp_dir=temp_dir,
         slow_motion_speed=video_cfg.get("slow_motion_speed", 0.66),
-        target_width=video_cfg.get("target_width", 1920),
-        target_height=video_cfg.get("target_height", 1080),
-        target_fps=video_cfg.get("target_fps", 30),
+        target_width=target_width,
+        target_height=target_height,
+        target_fps=target_fps,
         scaling_mode=video_cfg.get("scaling_mode", "pad"),
         video_codec=video_cfg.get("video_codec", "libx264"),
-        crf=video_cfg.get("crf", 18),
-        preset=video_cfg.get("preset", "fast"),
+        crf=video_cfg.get("crf", 15),
+        preset=video_cfg.get("preset", "medium"),
         on_corrupt_file=exec_cfg.get("on_corrupt_file", "abort")
     )
 
@@ -297,8 +332,8 @@ def main() -> int:
         )
         logo_manager = LogoOverlayManager(
             config=logo_obj,
-            target_width=video_cfg.get("target_width", 1920),
-            target_height=video_cfg.get("target_height", 1080),
+            target_width=target_width,
+            target_height=target_height,
             ffmpeg_bin=ffmpeg_bin,
             ffprobe_bin=ffprobe_bin
         )
@@ -311,9 +346,9 @@ def main() -> int:
         output_dir=output_dir,
         output_filename=output_filename,
         video_codec=video_cfg.get("video_codec", "libx264"),
-        crf=video_cfg.get("crf", 18),
-        preset=video_cfg.get("preset", "fast"),
-        target_fps=video_cfg.get("target_fps", 30)
+        crf=video_cfg.get("crf", 15),
+        preset=video_cfg.get("preset", "medium"),
+        target_fps=target_fps
     )
 
     try:

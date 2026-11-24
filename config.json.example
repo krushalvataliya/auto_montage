@@ -16,13 +16,13 @@
     "opacity": 1.0
   },
   "video": {
-    "target_width": 1920,
-    "target_height": 1080,
-    "target_fps": 30,
+    "target_width": "auto",
+    "target_height": "auto",
+    "target_fps": "auto",
     "scaling_mode": "pad",
     "video_codec": "libx264",
-    "crf": 18,
-    "preset": "fast"
+    "crf": 15,
+    "preset": "medium"
   },
   "audio": {
     "music_filename": "",

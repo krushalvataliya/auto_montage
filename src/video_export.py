@@ -67,9 +67,9 @@ class VideoExporter:
                     "-ss", "0",
                     "-t", f"{item.play_duration:.6f}",
                     "-i", str(clip_path.resolve()),
-                    "-c:v", self.video_codec,
+                    "-c:v", "libx264",
                     "-preset", "ultrafast",
-                    "-crf", str(self.crf),
+                    "-crf", "0",
                     "-pix_fmt", "yuv420p",
                     str(trimmed_clip_path.resolve())
                 ]
@@ -164,6 +164,8 @@ class VideoExporter:
             "-c:v", self.video_codec,
             "-preset", self.preset,
             "-crf", str(self.crf),
+            "-profile:v", "high",
+            "-level", "4.2",
             "-r", str(self.target_fps),
             "-pix_fmt", "yuv420p",
             "-c:a", audio_processor.config.audio_codec,

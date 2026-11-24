@@ -55,7 +55,7 @@ class VideoProcessor:
     def _file_hash(self, file_path: Path) -> str:
         """Computes short MD5 hash based on path and file size/mtime for cache invalidation."""
         stat = file_path.stat()
-        meta_str = f"{file_path.name}_{stat.st_size}_{stat.st_mtime}_{self.slow_motion_speed}_{self.target_width}_{self.target_height}_{self.target_fps}_{self.scaling_mode}"
+        meta_str = f"lossless_v2_{file_path.name}_{stat.st_size}_{stat.st_mtime}_{self.slow_motion_speed}_{self.target_width}_{self.target_height}_{self.target_fps}_{self.scaling_mode}"
         return hashlib.md5(meta_str.encode("utf-8")).hexdigest()[:10]
 
     def _build_filtergraph(self) -> str:
@@ -71,13 +71,13 @@ class VideoProcessor:
         if self.scaling_mode == "crop":
             # Scale to cover target box, then crop center
             filters.append(
-                f"scale={self.target_width}:{self.target_height}:force_original_aspect_ratio=increase,"
+                f"scale={self.target_width}:{self.target_height}:force_original_aspect_ratio=increase:flags=lanczos+accurate_rnd,"
                 f"crop={self.target_width}:{self.target_height}:(iw-ow)/2:(ih-oh)/2"
             )
         else:
             # Default "pad": scale to fit within target box, pad remaining area with black
             filters.append(
-                f"scale={self.target_width}:{self.target_height}:force_original_aspect_ratio=decrease,"
+                f"scale={self.target_width}:{self.target_height}:force_original_aspect_ratio=decrease:flags=lanczos+accurate_rnd,"
                 f"pad={self.target_width}:{self.target_height}:(ow-iw)/2:(oh-ih)/2:black"
             )
 
@@ -142,15 +142,17 @@ class VideoProcessor:
 
         vf = self._build_filtergraph()
 
+        # Render intermediate normalized clip with True LOSSLESS H.264 (CRF 0)
+        # to ensure zero generation loss before the final assembly pass!
         cmd = [
             self.ffmpeg_bin,
             "-y",
             "-i", str(input_video.resolve()),
             "-vf", vf,
             "-an",  # Completely remove original audio
-            "-c:v", self.video_codec,
-            "-preset", self.preset,
-            "-crf", str(self.crf),
+            "-c:v", "libx264",
+            "-preset", "ultrafast",
+            "-crf", "0",
             "-pix_fmt", "yuv420p",
             str(output_path.resolve())
         ]

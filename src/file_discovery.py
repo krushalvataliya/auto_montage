@@ -52,7 +52,12 @@ def discover_files(
         ext = f.suffix.lower()
         if ext in VIDEO_EXTENSIONS:
             # Skip previously exported final video files in input folder
-            if "- final video" in f.stem.lower() or f.stem.lower() == "final_video" or (ignore_filenames and f.name in ignore_filenames):
+            if (
+                f.stem.lower() == input_dir.name.lower()
+                or "- final video" in f.stem.lower()
+                or f.stem.lower() == "final_video"
+                or (ignore_filenames and f.name in ignore_filenames)
+            ):
                 logger.debug("Skipping previously generated video in input folder: %s", f.name)
                 continue
             videos.append(f)
