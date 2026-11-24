@@ -115,10 +115,10 @@ All parameters are configurable without altering code:
 ```yaml
 paths:
   input_dir: "c:/Users/Krushal Vataliya/Downloads/yt retune/Girnaar Farte Lili Parikramaa"
-  output_dir: "./output"
+  output_dir: ""                 # Empty ("") saves directly inside input_dir
   temp_dir: "./temp"
   log_dir: "./logs"
-  output_filename: "final_video.mp4"
+  output_filename: ""            # Empty ("") defaults to "<folder_name> - final video.mp4"
   ffmpeg_path: ""
   ffprobe_path: ""
 

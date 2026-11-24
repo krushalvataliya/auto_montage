@@ -27,11 +27,13 @@ def discover_files(
     input_dir: Path,
     logo_enabled: bool = True,
     custom_music_path: Optional[str] = None,
-    custom_logo_path: Optional[str] = None
+    custom_logo_path: Optional[str] = None,
+    ignore_filenames: Optional[set] = None
 ) -> DiscoveredMedia:
     """
     Scans the input directory and identifies video clips, background music,
     and the PNG logo, applying strict validation according to project specs.
+    Ignores previously exported final video files.
     """
     if not input_dir.exists():
         raise FileDiscoveryError(f"Input folder does not exist: {input_dir}")
@@ -49,6 +51,10 @@ def discover_files(
     for f in all_files:
         ext = f.suffix.lower()
         if ext in VIDEO_EXTENSIONS:
+            # Skip previously exported final video files in input folder
+            if "- final video" in f.stem.lower() or f.stem.lower() == "final_video" or (ignore_filenames and f.name in ignore_filenames):
+                logger.debug("Skipping previously generated video in input folder: %s", f.name)
+                continue
             videos.append(f)
         elif ext in AUDIO_EXTENSIONS:
             audios.append(f)

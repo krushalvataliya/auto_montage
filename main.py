@@ -59,7 +59,13 @@ def main() -> int:
         "-o", "--output",
         dest="output_dir",
         default=None,
-        help="Override output directory for final video"
+        help="Override output directory for final video (default: saves directly in input folder)"
+    )
+    parser.add_argument(
+        "--output-name",
+        dest="output_filename",
+        default=None,
+        help="Override output filename (default: '{folder_name} - final video.mp4')"
     )
     parser.add_argument(
         "--speed",
@@ -100,8 +106,10 @@ def main() -> int:
     # CLI Overrides
     if args.input_dir:
         paths_cfg["input_dir"] = args.input_dir
-    if args.output_dir:
+    if args.output_dir is not None:
         paths_cfg["output_dir"] = args.output_dir
+    if args.output_filename is not None:
+        paths_cfg["output_filename"] = args.output_filename
     if args.speed is not None:
         video_cfg["slow_motion_speed"] = args.speed
     if args.seed is not None:
@@ -109,10 +117,23 @@ def main() -> int:
 
     # Setup Paths
     input_dir = Path(paths_cfg.get("input_dir", "./input")).resolve()
-    output_dir = Path(paths_cfg.get("output_dir", "./output")).resolve()
+
+    # Default output directory: input folder (unless explicitly configured otherwise)
+    raw_output_dir = paths_cfg.get("output_dir")
+    if not raw_output_dir or str(raw_output_dir).strip().lower() in ("", "input", "none", "null"):
+        output_dir = input_dir
+    else:
+        output_dir = Path(raw_output_dir).resolve()
+
+    # Default output filename: '{folder_name} - final video.mp4'
+    raw_output_filename = paths_cfg.get("output_filename")
+    if not raw_output_filename or str(raw_output_filename).strip().lower() in ("", "default", "none", "null"):
+        output_filename = f"{input_dir.name} - final video.mp4"
+    else:
+        output_filename = str(raw_output_filename)
+
     temp_dir = Path(paths_cfg.get("temp_dir", "./temp")).resolve()
     log_dir = Path(paths_cfg.get("log_dir", "./logs")).resolve()
-    output_filename = paths_cfg.get("output_filename", "final_video.mp4")
 
     # 2. Setup Logging
     log_level = exec_cfg.get("log_level", "INFO")
@@ -150,7 +171,8 @@ def main() -> int:
             input_dir=input_dir,
             logo_enabled=logo_cfg.get("enabled", True),
             custom_music_path=audio_cfg.get("music_filename") or None,
-            custom_logo_path=logo_cfg.get("filename") or None
+            custom_logo_path=logo_cfg.get("filename") or None,
+            ignore_filenames={output_filename, f"{input_dir.name} - final video.mp4"}
         )
     except FileDiscoveryError as e:
         logger.error("Input validation failed: %s", e)

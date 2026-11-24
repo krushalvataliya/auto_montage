@@ -12,10 +12,10 @@ Configures file locations and binary paths.
 | Parameter | Type | Default | Description |
 |---|---|---|---|
 | `input_dir` | `string` | `"./input"` | Path to input directory containing videos, music, and logo. |
-| `output_dir` | `string` | `"./output"` | Destination directory for exported final video. |
+| `output_dir` | `string` | `""` | Destination directory for exported final video. Leave empty (`""`) to save directly inside `input_dir` by default. |
 | `temp_dir` | `string` | `"./temp"` | Directory for intermediate normalized clips and concat lists. |
 | `log_dir` | `string` | `"./logs"` | Directory for persistent log files (`video_editor.log`). |
-| `output_filename` | `string` | `"final_video.mp4"` | File name of the exported video. |
+| `output_filename` | `string` | `""` | File name of the exported video. Leave empty (`""`) to automatically use `"<folder_name> - final video.mp4"`. |
 | `ffmpeg_path` | `string` | `""` | Optional explicit path to `ffmpeg.exe` (leave empty for auto-discovery). |
 | `ffprobe_path` | `string` | `""` | Optional explicit path to `ffprobe.exe` (leave empty for auto-discovery). |
 
